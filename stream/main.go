@@ -44,6 +44,6 @@ func (m middleWareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	r := RegisterHandlers()
-	mh := NewMiddleWareHandler(r, 2)
+	mh := NewMiddleWareHandler(r, 200)
 	http.ListenAndServe(":9000", mh)
 }
