@@ -23,7 +23,7 @@ type Article struct {
 }
 
 func indexHandler(w http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	t, e := template.ParseFiles("./startbootstrap-coming-soon/index.html")
+	t, e := template.ParseFiles("./startbootstrap-stylish-portfolio/index.html")
 	if e != nil {
 		sendErrorResponse(w, http.StatusInternalServerError, "404 page not find")
 		return

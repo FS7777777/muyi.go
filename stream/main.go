@@ -27,7 +27,7 @@ func RegisterHandlers() *httprouter.Router {
 
 	router.GET("/testpage", testPageHandler)
 
-	router.ServeFiles("/statics/*filepath", http.Dir("./startbootstrap-coming-soon/statics/"))
+	router.ServeFiles("/statics/*filepath", http.Dir("./startbootstrap-stylish-portfolio/statics/"))
 
 	return router
 }
