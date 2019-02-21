@@ -6,9 +6,12 @@ import (
 	"github.com/tarm/goserial"
 	"log"
 	"muyi.go/serialport/com"
+	"os"
+	"path/filepath"
 	"syscall"
-	"time"
 )
+
+// 使用go-svc进行管理程序初始化、启动、销毁工作
 
 type program struct {
 	collection *com.ComCollection
@@ -23,17 +26,23 @@ func main() {
 
 func (p *program) Init(env svc.Environment) error {
 	fmt.Println("init.....")
+	if env.IsWindowsService() {
+		dir := filepath.Dir(os.Args[0])
+		return os.Chdir(dir)
+	}
+	//configInit()
 	return nil
 }
 
 func (p *program) Start() error {
 	// 连接配置
-	conf := &serial.Config{Name: "COM2", Baud: 9600, ReadTimeout: time.Second * 1 /*毫秒*/ }
+	conf := &serial.Config{Name: "COM2", Baud: 9600 /*毫秒*/ }
 	iorwc, err := serial.OpenPort(conf)
 	if err != nil {
 		log.Fatal(err)
 	}
-	collection := com.New(iorwc)
+	requestCommand := []byte{0x01, 0x03, 0x00, 0x00, 0x00, 0x02}
+	collection := com.New(iorwc, requestCommand)
 
 	fmt.Println("start.....")
 	fmt.Println(syscall.Getpid())
