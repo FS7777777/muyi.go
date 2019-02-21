@@ -3,12 +3,15 @@ package main
 import (
 	"fmt"
 	"github.com/judwhite/go-svc/svc"
+	"github.com/tarm/goserial"
 	"log"
 	"muyi.go/serialport/com"
 	"syscall"
+	"time"
 )
 
 type program struct {
+	collection *com.ComCollection
 }
 
 func main() {
@@ -18,23 +21,30 @@ func main() {
 	}
 }
 
-func (program) Init(env svc.Environment) error {
-
+func (p *program) Init(env svc.Environment) error {
 	fmt.Println("init.....")
 	return nil
 }
 
-func (program) Start() error {
+func (p *program) Start() error {
+	// 连接配置
+	conf := &serial.Config{Name: "COM2", Baud: 9600, ReadTimeout: time.Second * 1 /*毫秒*/ }
+	iorwc, err := serial.OpenPort(conf)
+	if err != nil {
+		log.Fatal(err)
+	}
+	collection := com.New(iorwc)
 
 	fmt.Println("start.....")
 	fmt.Println(syscall.Getpid())
-	go func() {
-		com.Main()
-	}()
+
+	collection.Main()
+	p.collection = collection
 	return nil
 }
-func (program) Stop() error {
-
+func (p *program) Stop() error {
+	//关闭工作
+	p.collection.Exit()
 	fmt.Println("stop.....")
 	return nil
 }
