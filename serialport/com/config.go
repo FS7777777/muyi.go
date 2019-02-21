@@ -1,6 +1,7 @@
-package main
+package com
 
 import (
+	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
@@ -20,8 +21,10 @@ type Yaml struct {
 	}
 }
 
-func configInit() {
+func ConfigInit() {
 	// resultMap := make(map[string]interface{})
+
+	fmt.Println("hello")
 
 	conf := new(Yaml)
 	yamlFile, err := ioutil.ReadFile("connconfig.yaml")
@@ -36,5 +39,4 @@ func configInit() {
 		log.Fatalf("Unmarshal: %v", err)
 	}
 	log.Println("conf", conf)
-	// log.Println("conf", resultMap)
 }
