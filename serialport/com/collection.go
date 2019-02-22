@@ -75,18 +75,20 @@ func (c *ComCollection) send() {
 	command := CRC(c.requestCommand)
 	// 写入串口命令
 	log.Printf("写入的指令 %x", command)
-	_, err := c.reader.Write([]byte(command))
+	resultBuffer := new(bytes.Buffer)
+	for {
+		_, err := c.reader.Write([]byte(command))
 
-	if err != nil {
-		log.Fatal(err)
+		if err != nil {
+			log.Fatal(err)
+		}
+		c.receive(resultBuffer)
+		resultBuffer.Reset()
 	}
-
 }
 
 // 接收com口消息
-func (c *ComCollection) receive() {
-	counter := 0
-	resultBuffer := new(bytes.Buffer)
+func (c *ComCollection) receive(resultBuffer *bytes.Buffer) {
 	for {
 		//安全期间每次取一个
 		buffer := make([]byte, 1)
@@ -95,18 +97,18 @@ func (c *ComCollection) receive() {
 			log.Fatal(err)
 		}
 		if num > 0 {
-			//fmt.Println(buffer[:num])
-			//读取数量 寄存器树*2+5
 			resultBuffer.Write(buffer)
-			counter = counter + 1
-			if counter == c.registerNum*2+5 {
-				c.comDataChan <- resultBuffer.String()
-				//重置缓冲区和计数器
-				resultBuffer.Reset()
-				counter = 0
-			}
+		} else {
+			break
 		}
 	}
+	fmt.Println("---------------------")
+	if resultBuffer.Len() > 0 {
+		fmt.Println("++++++++++++++++++++")
+		//发送数据到通道
+		c.comDataChan <- resultBuffer.String()
+	}
+
 }
 
 //消息转移
@@ -120,10 +122,9 @@ func (c *ComCollection) transfer() {
 }
 
 func (c *ComCollection) Main() {
-	//发送采集指令
-	c.send()
-	// 开启goroutine采集com口数据
-	go c.receive()
+	//发送采集指令并采集数据
+	go c.send()
+
 	//发送消息
 	go c.transfer()
 }

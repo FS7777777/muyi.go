@@ -1,33 +1,24 @@
 package com
 
 import (
-	"fmt"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
 	"log"
 )
 
-type Yaml struct {
-	Mysql struct {
-		User     string `yaml:"user"`
-		Host     string `yaml:"host"`
-		Password string `yaml:"password"`
-		Port     string `yaml:"port"`
-		Name     string `yaml:"name"`
-	}
-	Cache struct {
-		Enable bool   `yaml:"enable"`
-		List   []byte `yaml:"list,flow"`
+type YamlConfig struct {
+	Serial struct {
+		Name    string `yaml:"name"`
+		Baud    int    `yaml:"baud"`
+		Timeout int    `yaml:"timeout"`
+		Command []byte `yaml:"command"`
 	}
 }
 
-func ConfigInit() {
-	// resultMap := make(map[string]interface{})
+func ConfigInit() (config *YamlConfig) {
 
-	fmt.Println("hello")
-
-	conf := new(Yaml)
-	yamlFile, err := ioutil.ReadFile("connconfig.yaml")
+	conf := new(YamlConfig)
+	yamlFile, err := ioutil.ReadFile("config.yaml")
 
 	log.Println("yamlFile:", yamlFile)
 	if err != nil {
@@ -39,4 +30,5 @@ func ConfigInit() {
 		log.Fatalf("Unmarshal: %v", err)
 	}
 	log.Println("conf", conf)
+	return conf
 }
