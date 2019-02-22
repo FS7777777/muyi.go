@@ -6,6 +6,7 @@ import (
 	"github.com/tarm/goserial"
 	"log"
 	"muyi.go/serialport/com"
+	"muyi.go/serialport/conf"
 	"os"
 	"path/filepath"
 	"syscall"
@@ -35,7 +36,7 @@ func (p *program) Init(env svc.Environment) error {
 }
 
 func (p *program) Start() error {
-	config := com.ConfigInit()
+	config := conf.ConfigInit()
 	log.Println("conf", config.Serial)
 	//连接配置
 	conf := &serial.Config{Name: "COM2", Baud: 9600, ReadTimeout: time.Second * 1}
