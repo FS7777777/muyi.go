@@ -4,8 +4,9 @@ import (
 	"bytes"
 	"encoding/binary"
 	"fmt"
+	"github.com/astaxie/beego"
 	"io"
-	"log"
+	"os"
 )
 
 //说明：每个寄存器为2字节数据，每次查询设定查询寄存器的数量和起始地址。寄存器的起始地址为0x0000，代表寄存器0x40001，每次查询最多查询100个寄存器。
@@ -76,16 +77,18 @@ func New(iorwc io.ReadWriteCloser, requestCommand []byte) *ComCollection {
 func (c *ComCollection) send() {
 	command := CRC(c.requestCommand)
 	// 写入串口命令
-	log.Printf("写入的指令 %x", command)
+	beego.BeeLogger.Info("写入的指令 %x", command)
 	resultBuffer := new(bytes.Buffer)
 	for {
 		_, err := c.reader.Write([]byte(command))
 
 		if err != nil {
-			log.Fatal(err)
+			beego.BeeLogger.Error("send command error", err)
+			os.Exit(1)
+		} else {
+			c.receive(resultBuffer)
+			resultBuffer.Reset()
 		}
-		c.receive(resultBuffer)
-		resultBuffer.Reset()
 	}
 }
 
@@ -96,7 +99,8 @@ func (c *ComCollection) receive(resultBuffer *bytes.Buffer) {
 		buffer := make([]byte, 1)
 		num, err := c.reader.Read(buffer)
 		if err != nil {
-			log.Fatal(err)
+			beego.BeeLogger.Error("read data from com error", err)
+			os.Exit(1)
 		}
 		if num > 0 {
 			resultBuffer.Write(buffer)
@@ -104,9 +108,9 @@ func (c *ComCollection) receive(resultBuffer *bytes.Buffer) {
 			break
 		}
 	}
-	fmt.Println("---------------------")
+	beego.BeeLogger.Info("---------------------")
 	if resultBuffer.Len() > 0 {
-		fmt.Println("++++++++++++++++++++")
+		beego.BeeLogger.Info("++++++++++++++++++++")
 		//发送数据到通道
 		c.comDataChan <- resultBuffer.String()
 	}

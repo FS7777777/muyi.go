@@ -1,9 +1,9 @@
 package conf
 
 import (
+	"github.com/astaxie/beego"
 	"gopkg.in/yaml.v2"
 	"io/ioutil"
-	"log"
 )
 
 type YamlConfig struct {
@@ -19,20 +19,18 @@ type YamlConfig struct {
 	}
 }
 
-func ConfigInit() (config *YamlConfig) {
+func ConfigInit() (config *YamlConfig, err error) {
 
 	conf := new(YamlConfig)
 	yamlFile, err := ioutil.ReadFile("config.yaml")
-
-	log.Println("yamlFile:", yamlFile)
+	beego.BeeLogger.Debug("yamlFile:", yamlFile)
 	if err != nil {
-		log.Printf("yamlFile.Get err #%v ", err)
+		beego.BeeLogger.Debug("yamlFile.Get err #%v ", err)
 	}
 	err = yaml.Unmarshal(yamlFile, conf)
-	// err = yaml.Unmarshal(yamlFile, &resultMap)
 	if err != nil {
-		log.Fatalf("Unmarshal: %v", err)
+		beego.BeeLogger.Info("Unmarshal: %v", err)
 	}
-	log.Println("conf", conf)
-	return conf
+	beego.BeeLogger.Info("conf", conf)
+	return conf, err
 }
