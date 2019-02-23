@@ -3,3 +3,6 @@ serial:
   baud: 9800
   command: [0x01, 0x03, 0x00, 0x00, 0x00, 0x02]
   timeout: 1
+rabbit:
+  amqp : amqp://guest:guest@localhost:5672/
+  exchange : fanoutComExchange

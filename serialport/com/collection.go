@@ -50,6 +50,8 @@ type ComCollection struct {
 	requestCommand []byte
 	// 定义chan 进行数据传输
 	comDataChan chan string
+	// 数据分发接口
+	dataTransfer DataTransfer
 }
 
 func New(iorwc io.ReadWriteCloser, requestCommand []byte) *ComCollection {
@@ -116,7 +118,14 @@ func (c *ComCollection) transfer() {
 	for {
 		select {
 		case v := <-c.comDataChan:
-			fmt.Println(string(v))
+			{
+				fmt.Println(string(v))
+				//1、数据校验成功后进行第二步操作
+				//2、数据转换成二进制分发
+				if c.dataTransfer != nil {
+					c.dataTransfer.Transfer(make([]byte, 128))
+				}
+			}
 		}
 	}
 }

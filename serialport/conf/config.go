@@ -13,6 +13,10 @@ type YamlConfig struct {
 		Timeout int    `yaml:"timeout"`
 		Command []byte `yaml:"command"`
 	}
+	Rabbit struct {
+		Amqp     string `yaml:"amqp"`
+		Exchange string `yaml:"exchange"`
+	}
 }
 
 func ConfigInit() (config *YamlConfig) {

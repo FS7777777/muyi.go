@@ -7,7 +7,7 @@ import (
 )
 
 // 定义失败回调
-func failOnError(err error, msg string) {
+func failOnSend(err error, msg string) {
 	if err != nil {
 		log.Fatalf("%s: %s", msg, err)
 	}
@@ -18,11 +18,11 @@ var fanoutExchangeName = "fanoutComExchange"
 
 func main() {
 	conn, err := amqp.Dial("amqp://guest:guest@localhost:5672/")
-	failOnError(err, "Failed to connect to RabbitMQ")
+	failOnSend(err, "Failed to connect to RabbitMQ")
 	defer conn.Close()
 
 	ch, err := conn.Channel()
-	failOnError(err, "Failed to open a channel")
+	failOnSend(err, "Failed to open a channel")
 	defer ch.Close()
 
 	//定义Exchange
@@ -40,7 +40,7 @@ func main() {
 		panic(exchangeDeclareErr)
 	}
 
-	failOnError(exchangeDeclareErr, "Failed to declare a exchange")
+	failOnSend(exchangeDeclareErr, "Failed to declare a exchange")
 
 	//发送消息
 	body := "Hello World!"
@@ -54,5 +54,5 @@ func main() {
 			Body:        []byte(body),
 		})
 	log.Printf(" [x] Sent %s", body)
-	failOnError(err, "Failed to publish a message")
+	failOnSend(err, "Failed to publish a message")
 }
