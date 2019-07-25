@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"muyi/pubsub"
+	"github.com/muyi.go/messagequeue/pubsub"
 	"strings"
 	"time"
 )

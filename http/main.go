@@ -2,7 +2,7 @@ package main
 
 import
 (   "fmt"
-	"../http/middleware"
+	"github.com/muyi.go/http/middleware"
 )
 
 
