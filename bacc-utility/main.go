@@ -8,11 +8,20 @@ import (
 	"github.com/muyi.go/bacc-utility/util"
 	"github.com/muyi.go/bacc-utility/ws"
 	"net"
+	"net/http"
 	"os"
 )
 
 func main() {
 	fmt.Println(os.Args)
+
+	// start tcp
+	initTCPServer()
+	// start http server
+	initHttpServer()
+}
+
+func initHttpServer()  {
 	r := gin.Default()
 	r.LoadHTMLGlob("dist/index.html") // 添加入口index.html
 	//r.LoadHTMLFiles("static/*/*")	// 添加资源路径
@@ -25,16 +34,22 @@ func main() {
 	r.Static("logo.png", "./dist/logo.png")
 	r.Static("color.less", "./dist/color.less")
 	r.StaticFile("/", "./dist/index.html")
-	// init web socket
-	w := new(ws.WS)
-	r.GET("/ping", w.Ping)
-	//监听 get请求  /test路径
-	r.GET("/test", func(c *gin.Context) {
-		c.JSON(200, []string{"123", "321"})
-		w.Send()
-	})
-	// start tcp
-	initTCPServer()
+
+	r.Use(cors())
+
+	v1 := r.Group("/v1")
+	{
+		// init web socket
+		v1.GET("/ping", ws.WebSocket.Ping)
+		//监听 get请求  /test路径
+		v1.GET("/test", func(c *gin.Context) {
+			c.JSON(200, []string{"123", "321"})
+			ws.WebSocket.Send()
+		})
+		v1.POST("/tm", func(c *gin.Context) {
+			c.JSON(200, []string{"123", "321"})
+		})
+	}
 	// start http server
 	r.Run(":" + conf.PortConfig.HttpPort)
 }
@@ -93,4 +108,20 @@ func initTCPServer() {
 	wg.Wrap(func() {
 		protocol.TCPVoiceServer(tcpListenerVoice)
 	})
+}
+
+func cors() gin.HandlerFunc {
+	return func(c *gin.Context) {
+		method := c.Request.Method
+
+		c.Header("Access-Control-Allow-Origin", "*")
+		c.Header("Access-Control-Allow-Headers", "Content-Type,AccessToken,X-CSRF-Token, Authorization, Token")
+		c.Header("Access-Control-Allow-Methods", "POST, GET, OPTIONS")
+		c.Header("Access-Control-Expose-Headers", "Content-Length, Access-Control-Allow-Origin, Access-Control-Allow-Headers, Content-Type")
+		c.Header("Access-Control-Allow-Credentials", "true")
+		if method == "OPTIONS" {
+			c.AbortWithStatus(http.StatusNoContent)
+		}
+		c.Next()
+	}
 }

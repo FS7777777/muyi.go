@@ -1,6 +1,7 @@
 package ws
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"net/http"
@@ -18,12 +19,19 @@ type WS struct {
 	err    error
 }
 
+var (
+	WebSocket = &WS{}
+)
 //webSocket请求ping 返回pong
 func (ws *WS) Ping(c *gin.Context) {
 	//升级get请求为webSocket协议
 	ws.Server, ws.err = upGrader.Upgrade(c.Writer, c.Request, nil)
 	if ws.err != nil {
 		return
+	}
+	err := ws.Server.WriteMessage(1, []byte("hello we connected"))
+	if err != nil {
+		fmt.Println(err.Error())
 	}
 }
 
