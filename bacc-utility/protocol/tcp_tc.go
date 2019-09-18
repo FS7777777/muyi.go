@@ -3,30 +3,28 @@ package protocol
 import (
 	"bufio"
 	"fmt"
+	"io"
 	"net"
 	"runtime"
 	"strings"
-	"time"
 )
 
-func handleImageConn(c net.Conn) {
-	//defer c.Close()
-	writer := bufio.NewWriter(c)
-	//reader := bufio.NewReader(c)
+func handleTCConn(c net.Conn) {
+	defer c.Close()
+	reader := bufio.NewReader(c)
 	for {
-		//data, err := ioutil.ReadFile("F:/6448355_204110337000_2.jpg")
-		//if err != nil {
-		//	fmt.Println("read error")
-		//	return
-		//}
-		writer.Write([]byte("hello world\n"))
-		writer.Flush()
-		time.Sleep(time.Duration(3) * time.Second)
+		b := make([]byte,100)
+		_, err:= reader.Read(b)
+		if err!=nil || err == io.EOF {
+			fmt.Println(err.Error())
+			break
+		}
+		fmt.Println(string(b))
 	}
 }
 
 
-func TCPImageServer(listener net.Listener) {
+func TCPTCServer(listener net.Listener) {
 	fmt.Println("TCP: listening on %s", listener.Addr())
 
 	for {
@@ -46,6 +44,6 @@ func TCPImageServer(listener net.Listener) {
 		fmt.Println("accept c:", c)
 		// start a new goroutine to handle
 		// the new connection.
-		go handleImageConn(c)
+		go handleTCConn(c)
 	}
 }

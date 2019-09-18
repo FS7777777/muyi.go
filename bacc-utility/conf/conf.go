@@ -6,12 +6,21 @@ import (
 	"log"
 )
 
-type Conf struct {
-	Enabled bool   `yaml:"enabled"` //yaml：yaml格式 enabled：属性的为enabled
-	Path    string `yaml:"path"`
+type portConfig struct {
+	Enabled        bool   `yaml:"enabled"`   //yaml：yaml格式 enabled：属性的为enabled
+	HttpPort       string `yaml:"http_port"` //yaml：yaml格式 enabled：属性的为enabled
+	TMPort         string `yaml:"tm_port"`
+	ImagePort      string `yaml:"image_port"`
+	TCLoopbackPort string `yaml:"tc_loopback_port"`
+	TCPort         string `yaml:"tc_port"`
+	VoicePort      string `yaml:"voice_port"`
 }
 
-func (c *Conf) GetConf() *Conf {
+var (
+	PortConfig = (&portConfig{}).getConf()
+)
+
+func (c *portConfig) getConf() *portConfig {
 	yamlFile, err := ioutil.ReadFile("conf.yaml")
 	if err != nil {
 		log.Printf("yamlFile.Get err   #%v ", err)
