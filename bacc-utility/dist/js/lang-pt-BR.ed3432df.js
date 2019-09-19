@@ -1,1 +1,0 @@
-(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["lang-pt-BR"],{3714:function(a,e,n){"use strict";n.r(e),e["default"]={dashboard:{workplace:{project:"...",teamRank:"...",views:"..."}}}}}]);

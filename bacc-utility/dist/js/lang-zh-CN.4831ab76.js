@@ -1,1 +1,0 @@
-(window["webpackJsonp"]=window["webpackJsonp"]||[]).push([["lang-zh-CN"],{2807:function(a,e,n){"use strict";n.r(e),e["default"]={dashboard:{workplace:{project:"项目数",teamRank:"团队排名",views:"项目访问"}}}}}]);
