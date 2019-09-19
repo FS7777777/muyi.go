@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
+	"io/ioutil"
+	"log"
 	"net"
 	"net/http"
 	"os"
@@ -35,6 +37,9 @@ type SMTU struct {
 	ws *websocket.Conn
 	// smtu Config
 	smtuConfig *SMTUConfig
+
+	dataTM    []byte
+	dataImage []byte
 }
 
 func Main() {
@@ -197,9 +202,59 @@ func (smtu *SMTU) initHttpServer() {
 			c.JSON(200, []string{"123", "321"})
 			smtu.send()
 		})
+		v1.POST("/upload_tm", func(c *gin.Context) {
+			// 单文件
+			file, _ := c.FormFile("file")
+			log.Println(file.Filename)
+
+			fileStream, err := file.Open()
+			if err != nil {
+				c.String(http.StatusInternalServerError, "read file error")
+				return
+			}
+			data, err := ioutil.ReadAll(fileStream)
+			if err != nil {
+				c.String(http.StatusInternalServerError, "read file error")
+				return
+			}
+			smtu.dataTM = data
+			// 上传文件到指定的路径
+			// c.SaveUploadedFile(file, dst)
+
+			c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
+		})
 		v1.POST("/tm", func(c *gin.Context) {
 			c.JSON(200, []string{"123", "321"})
 			for _, v := range smtu.clientTM {
+				writer := bufio.NewWriter(v)
+				writer.Write([]byte("hello world i got you\n"))
+				writer.Flush()
+			}
+		})
+		v1.POST("/upload_image", func(c *gin.Context) {
+			// 单文件
+			file, _ := c.FormFile("file")
+			log.Println(file.Filename)
+
+			fileStream, err := file.Open()
+			if err != nil {
+				c.String(http.StatusInternalServerError, "read file error")
+				return
+			}
+			data, err := ioutil.ReadAll(fileStream)
+			if err != nil {
+				c.String(http.StatusInternalServerError, "read file error")
+				return
+			}
+			smtu.dataImage = data
+			// 上传文件到指定的路径
+			// c.SaveUploadedFile(file, dst)
+
+			c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
+		})
+		v1.POST("/image", func(c *gin.Context) {
+			c.JSON(200, []string{"123", "321"})
+			for _, v := range smtu.clientImage {
 				writer := bufio.NewWriter(v)
 				writer.Write([]byte("hello world i got you\n"))
 				writer.Flush()
