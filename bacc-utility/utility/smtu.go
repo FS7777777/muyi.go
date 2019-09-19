@@ -227,13 +227,13 @@ func (smtu *SMTU) initHttpServer() {
 			c.JSON(200, []string{"123", "321"})
 			for _, v := range smtu.clientTM {
 				writer := bufio.NewWriter(v)
-				writer.Write([]byte("hello world i got you\n"))
+				writer.Write(smtu.dataTM)
 				writer.Flush()
 			}
 		})
 		v1.POST("/upload_image", func(c *gin.Context) {
 			// 单文件
-			file, _ := c.FormFile("file")
+			file, _ := c.FormFile("image")
 			log.Println(file.Filename)
 
 			fileStream, err := file.Open()
@@ -256,7 +256,7 @@ func (smtu *SMTU) initHttpServer() {
 			c.JSON(200, []string{"123", "321"})
 			for _, v := range smtu.clientImage {
 				writer := bufio.NewWriter(v)
-				writer.Write([]byte("hello world i got you\n"))
+				writer.Write(smtu.dataImage)
 				writer.Flush()
 			}
 		})
