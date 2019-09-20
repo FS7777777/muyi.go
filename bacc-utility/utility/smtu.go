@@ -40,6 +40,7 @@ type SMTU struct {
 
 	dataTM    []byte
 	dataImage []byte
+	dataTC    []byte
 }
 
 func Main() {
@@ -260,7 +261,52 @@ func (smtu *SMTU) initHttpServer() {
 				writer.Flush()
 			}
 		})
+
+		v1.POST("/upload_tc", func(c *gin.Context) {
+			// 单文件
+			file, _ := c.FormFile("file")
+			log.Println(file.Filename)
+
+			fileStream, err := file.Open()
+			if err != nil {
+				c.String(http.StatusInternalServerError, "read file error")
+				return
+			}
+			data, err := ioutil.ReadAll(fileStream)
+			if err != nil {
+				c.String(http.StatusInternalServerError, "read file error")
+				return
+			}
+			smtu.dataTC = data
+			// 上传文件到指定的路径
+			// c.SaveUploadedFile(file, dst)
+
+			c.String(http.StatusOK, fmt.Sprintf("'%s' uploaded!", file.Filename))
+		})
+
+		type TCPack struct {
+			Ip     string `json:"ip"`
+			Port   int32  `json:"port"`
+			Manual bool   `json:"manual" `
+			First  string `json:"first" `
+			Second string `json:"second" `
+			Third  string `json:"third"`
+		}
+
+		v1.POST("/tc", func(c *gin.Context) {
+			var tc TCPack
+
+			err :=c.ShouldBindJSON(&tc)
+			if err != nil{
+				log.Println(err)
+			}
+			log.Println(tc.Ip)
+
+			c.JSON(200, []string{"123", "321"})
+			// udp 发送
+		})
 	}
 	// start http server
 	r.Run(":" + smtu.smtuConfig.HttpPort)
 }
+
