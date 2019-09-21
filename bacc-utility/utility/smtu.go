@@ -34,7 +34,7 @@ type SMTU struct {
 	tcpListenerVoice net.Listener
 
 	// ws
-	ws *websocket.Conn
+	clientSocket map[string]*websocket.Conn
 	// smtu Config
 	smtuConfig *SMTUConfig
 
@@ -53,6 +53,7 @@ func Main() {
 		clientTM:         make(map[string]net.Conn),
 		clientImage:      make(map[string]net.Conn),
 		clientTCLoopback: make(map[string]net.Conn),
+		clientSocket:     make(map[string]*websocket.Conn),
 	}
 	fmt.Println(smtu)
 	// start tcp
@@ -153,28 +154,32 @@ var upGrader = websocket.Upgrader{
 }
 
 func (smtu *SMTU) ping(c *gin.Context) {
-	var err error
 	//升级get请求为webSocket协议
-	smtu.ws, err = upGrader.Upgrade(c.Writer, c.Request, nil)
+	ws, err := upGrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		return
 	}
-	err = smtu.ws.WriteMessage(1, []byte("hello we connected"))
+	smtu.clientSocket[ws.RemoteAddr().String()] = ws
+	err = ws.WriteMessage(1, []byte("hello we connected"+ws.RemoteAddr().String()))
 	if err != nil {
 		fmt.Println(err.Error())
 	}
 }
 func (smtu *SMTU) send() {
-	if smtu.ws == nil {
-		return
-	}
+	i := 0
 	for {
-		//写入ws数据
-		err := smtu.ws.WriteMessage(1, []byte("hello world"))
-		if err != nil {
-			break
+		for k, v := range smtu.clientSocket {
+			//写入ws数据
+			err := v.WriteMessage(1, []byte(fmt.Sprintf("hello world %d", i)))
+			if err != nil {
+				fmt.Println(err.Error())
+				delete(smtu.clientSocket, k)
+				//continue
+			}
 		}
-		time.Sleep(time.Duration(10) * time.Second)
+
+		i++
+		time.Sleep(time.Duration(1) * time.Second)
 	}
 }
 
@@ -296,8 +301,8 @@ func (smtu *SMTU) initHttpServer() {
 		v1.POST("/tc", func(c *gin.Context) {
 			var tc TCPack
 
-			err :=c.ShouldBindJSON(&tc)
-			if err != nil{
+			err := c.ShouldBindJSON(&tc)
+			if err != nil {
 				log.Println(err)
 			}
 			log.Println(tc.Ip)
@@ -309,4 +314,3 @@ func (smtu *SMTU) initHttpServer() {
 	// start http server
 	r.Run(":" + smtu.smtuConfig.HttpPort)
 }
-
