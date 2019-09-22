@@ -330,6 +330,22 @@ func (smtu *SMTU) initHttpServer() {
 			c.JSON(200, []string{"123", "321"})
 			// udp 发送
 		})
+
+		v1.GET("/video", func(c *gin.Context) {
+
+			vl := "H:\\迅雷下载\\阳光电影www.ygdy8.com.大人物.HD.1080p.国语中英双字.mkv"
+
+			video, err := os.Open(vl)
+			if err != nil {
+				log.Printf("Error when try to open file: %v", err)
+				return
+			}
+
+			c.Header("Content-Type", "video/mp4")
+			http.ServeContent(c.Writer, c.Request, "", time.Now(), video)
+
+			defer video.Close()
+		})
 	}
 	// start http server
 	r.Run(":" + smtu.smtuConfig.HttpPort)

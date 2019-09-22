@@ -1,61 +1,49 @@
-package main
+package main 
 
 import (
-	"fmt"
-	"github.com/gin-gonic/gin"
-	"net"
-	"os"
+	"net/http"
+	"github.com/julienschmidt/httprouter"
 )
 
-func main(){
-	fmt.Println(os.Args)
-	r := gin.Default()
-	r.LoadHTMLGlob("dist/index.html")    // 添加入口index.html
-	//r.LoadHTMLFiles("static/*/*")	// 添加资源路径
-	r.Static("/assets", "./dist/assets")
-	r.Static("/css", "./dist/css")
-	r.Static("/img", "./dist/img")
-	r.Static("/js", "./dist/js")
-	r.Static("/loading", "./dist/loading")
-	r.Static("avatar2.jpg", "./dist/avatar2.jpg")
-	r.Static("logo.png", "./dist/logo.png")
-	r.Static("color.less", "./dist/color.less")
-	r.StaticFile("/", "./dist/index.html")
-
-	r.Run(":8080")
+type middleWareHandler struct {
+	r *httprouter.Router
+	l *ConnLimiter
 }
 
-func checkError(err error){
-	if  err != nil {
-		fmt.Println("Error: %s", err.Error())
-		os.Exit(1)
-	}
+func NewMiddleWareHandler(r *httprouter.Router, cc int) http.Handler {
+	m := middleWareHandler{}
+	m.r = r
+	m.l = NewConnLimiter(cc)
+	return m
 }
 
-func recvUDPMsg(conn *net.UDPConn){
-	var buf [20]byte
+func RegisterHandlers() *httprouter.Router {
+	router := httprouter.New()
 
-	n, raddr, err := conn.ReadFromUDP(buf[0:])
-	if err != nil {
+	router.GET("/",indexHandler)
+	router.GET("/videos/:vid-id", streamHandler)
+
+	router.POST("/upload/:vid-id", uploadHandler)
+
+	router.GET("/testpage", testPageHandler)
+
+	router.ServeFiles("/statics/*filepath", http.Dir("./startbootstrap-coming-soon/statics/"))
+
+	return router
+}
+
+func (m middleWareHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	if !m.l.GetConn() {
+		sendErrorResponse(w, http.StatusTooManyRequests, "Too many requests")
 		return
 	}
 
-	fmt.Println("msg is ", string(buf[0:n]))
-
-	//WriteToUDP
-	//func (c *UDPConn) WriteToUDP(b []byte, addr *UDPAddr) (int, error)
-	_, err = conn.WriteToUDP([]byte("nice to see u"), raddr)
-	checkError(err)
+	m.r.ServeHTTP(w, r)
+	defer m.l.ReleaseConn()
 }
 
 func main() {
-	udp_addr, err := net.ResolveUDPAddr("udp", ":11110")
-	checkError(err)
-
-	conn, err := net.ListenUDP("udp", udp_addr)
-	defer conn.Close()
-	checkError(err)
-
-	//go recvUDPMsg(conn)
-	recvUDPMsg(conn)
+	r := RegisterHandlers()
+	mh := NewMiddleWareHandler(r, 2)
+	http.ListenAndServe(":9000", mh)
 }
