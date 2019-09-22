@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"strconv"
 	"time"
 )
 
@@ -291,7 +292,7 @@ func (smtu *SMTU) initHttpServer() {
 
 		type TCPack struct {
 			Ip     string `json:"ip"`
-			Port   int32  `json:"port"`
+			Port   int  `json:"port"`
 			Manual bool   `json:"manual" `
 			First  string `json:"first" `
 			Second string `json:"second" `
@@ -308,7 +309,7 @@ func (smtu *SMTU) initHttpServer() {
 			log.Println(tc.Ip)
 
 			// send udp
-			addr, err := net.ResolveUDPAddr("udp", tc.Ip+":"+string(tc.Port))
+			addr, err := net.ResolveUDPAddr("udp", tc.Ip+":"+strconv.Itoa(tc.Port))
 			if err != nil {
 				fmt.Println("Can't resolve address: ", err)
 				c.JSON(200, []string{"Can't resolve address"})
@@ -325,7 +326,7 @@ func (smtu *SMTU) initHttpServer() {
 			if err != nil {
 				fmt.Println("failed:", err)
 			}
-			
+
 			c.JSON(200, []string{"123", "321"})
 			// udp 发送
 		})
