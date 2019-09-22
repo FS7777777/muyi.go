@@ -307,6 +307,25 @@ func (smtu *SMTU) initHttpServer() {
 			}
 			log.Println(tc.Ip)
 
+			// send udp
+			addr, err := net.ResolveUDPAddr("udp", tc.Ip+":"+string(tc.Port))
+			if err != nil {
+				fmt.Println("Can't resolve address: ", err)
+				c.JSON(200, []string{"Can't resolve address"})
+			}
+
+			conn, err := net.DialUDP("udp", nil, addr)
+			if err != nil {
+				fmt.Println("Can't dial: ", err)
+				c.JSON(200, []string{"连接失败"})
+			}
+			defer conn.Close()
+
+			_, err = conn.Write(smtu.dataTC)
+			if err != nil {
+				fmt.Println("failed:", err)
+			}
+			
 			c.JSON(200, []string{"123", "321"})
 			// udp 发送
 		})

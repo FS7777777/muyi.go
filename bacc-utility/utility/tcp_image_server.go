@@ -47,6 +47,6 @@ func TCPImageServer(listener net.Listener, smtu *SMTU) {
 		fmt.Println("accept c:", c)
 		// start a new goroutine to handle
 		// the new connection.
-		go handleImageConn(c)
+		//go handleImageConn(c)
 	}
 }
