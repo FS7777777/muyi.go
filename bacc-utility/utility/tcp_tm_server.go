@@ -27,8 +27,8 @@ func handleTMConn(c net.Conn) {
 	}
 }
 
-func TCPTMServer(listener net.Listener, smtu *SMTU) {
-	fmt.Println("TCP: listening on %s", listener.Addr())
+func (s *tcpServer) TCPTMServer(listener net.Listener) {
+	fmt.Println("TCP: tm listening on %s", listener.Addr())
 
 	for {
 		c, err := listener.Accept()
@@ -45,7 +45,7 @@ func TCPTMServer(listener net.Listener, smtu *SMTU) {
 			break
 		}
 
-		smtu.AddClientTM(c.RemoteAddr().String(), c)
+		s.ctx.smtu.AddClientTM(c.RemoteAddr().String(), c)
 
 		fmt.Println("accept c:", c)
 		// start a new goroutine to handle

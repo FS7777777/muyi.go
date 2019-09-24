@@ -24,8 +24,8 @@ func handleTCConn(c net.Conn) {
 	}
 }
 
-func TCPTCServer(listener net.Listener) {
-	fmt.Println("TCP: listening on %s", listener.Addr())
+func (s *tcpServer) TCPTCServer(listener net.Listener) {
+	fmt.Println("TCP: TC listening on %s", listener.Addr())
 
 	for {
 		c, err := listener.Accept()

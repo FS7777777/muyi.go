@@ -13,9 +13,9 @@ func handleVoiceConn(c net.Conn) {
 	defer c.Close()
 	reader := bufio.NewReader(c)
 	for {
-		b := make([]byte,100)
-		_, err:= reader.Read(b)
-		if err!=nil || err == io.EOF {
+		b := make([]byte, 100)
+		_, err := reader.Read(b)
+		if err != nil || err == io.EOF {
 			fmt.Println(err.Error())
 			break
 		}
@@ -23,9 +23,8 @@ func handleVoiceConn(c net.Conn) {
 	}
 }
 
-
-func TCPVoiceServer(listener net.Listener) {
-	fmt.Println("TCP: listening on %s", listener.Addr())
+func (s *tcpServer) TCPVoiceServer(listener net.Listener) {
+	fmt.Println("TCP: voice listening on %s", listener.Addr())
 
 	for {
 		c, err := listener.Accept()

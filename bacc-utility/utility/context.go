@@ -1,6 +1,6 @@
 package utility
 
-// retain, not use now
+// context
 type smtuContext struct {
 	smtu *SMTU
 }

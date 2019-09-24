@@ -27,8 +27,8 @@ func handleTCLoopbackConn(c net.Conn) {
 	}
 }
 
-func TCPTCLoopbackServer(listener net.Listener, smtu *SMTU) {
-	fmt.Println("TCP: listening on %s", listener.Addr())
+func (s *tcpServer)TCPTCLoopbackServer(listener net.Listener) {
+	fmt.Println("TCP: tc loopback listening on %s", listener.Addr())
 
 	for {
 		c, err := listener.Accept()
@@ -44,7 +44,7 @@ func TCPTCLoopbackServer(listener net.Listener, smtu *SMTU) {
 			}
 			break
 		}
-		smtu.AddClientTCLoopback(c.RemoteAddr().String(), c)
+		s.ctx.smtu.AddClientTCLoopback(c.RemoteAddr().String(), c)
 		fmt.Println("accept c:", c)
 		// start a new goroutine to handle
 		// the new connection.

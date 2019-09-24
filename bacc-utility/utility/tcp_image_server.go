@@ -26,8 +26,8 @@ func handleImageConn(c net.Conn) {
 
 }
 
-func TCPImageServer(listener net.Listener, smtu *SMTU) {
-	fmt.Println("TCP: listening on %s", listener.Addr())
+func (s *tcpServer) TCPImageServer(listener net.Listener) {
+	fmt.Println("TCP: image listening on %s", listener.Addr())
 
 	for {
 		c, err := listener.Accept()
@@ -43,7 +43,8 @@ func TCPImageServer(listener net.Listener, smtu *SMTU) {
 			}
 			break
 		}
-		smtu.AddClientImage(c.RemoteAddr().String(), c)
+		s.ctx.smtu.AddClientImage(c.RemoteAddr().String(), c)
+
 		fmt.Println("accept c:", c)
 		// start a new goroutine to handle
 		// the new connection.
