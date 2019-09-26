@@ -54,8 +54,9 @@ func newHTTPServer(ctx *smtuContext) {
 		v1.GET("/video", s.video)
 	}
 	// start http server
-	r.Run(":" + s.ctx.smtu.smtuConfig.HttpPort)
-
+	s.ctx.smtu.waitGroup.Wrap(func() {
+		r.Run(":" + s.ctx.smtu.smtuConfig.HttpPort)
+	})
 }
 
 func cors() gin.HandlerFunc {

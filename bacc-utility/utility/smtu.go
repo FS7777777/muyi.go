@@ -33,6 +33,8 @@ type SMTU struct {
 	// smtu Config
 	smtuConfig *SMTUConfig
 
+	waitGroup WaitGroupWrapper
+
 	dataTM    []byte
 	dataImage []byte
 	dataTC    []byte

@@ -18,14 +18,14 @@ func newTCPServer(ctx *smtuContext) {
 	var err error
 	// log tcp port
 	fmt.Println(ctx.smtu.smtuConfig)
-	wg := WaitGroupWrapper{}
+	//wg := WaitGroupWrapper{}
 	// start TM server
 	tcp.ctx.smtu.tcpListenerTM, err = net.Listen("tcp", ":"+tcp.ctx.smtu.smtuConfig.TMPort)
 	if err != nil {
 		fmt.Println("listen error:", err)
 		os.Exit(1)
 	}
-	wg.Wrap(func() {
+	tcp.ctx.smtu.waitGroup.Wrap(func() {
 		tcp.TCPTMServer(tcp.ctx.smtu.tcpListenerTM)
 	})
 
@@ -35,7 +35,7 @@ func newTCPServer(ctx *smtuContext) {
 		fmt.Println("listen error:", err)
 		os.Exit(1)
 	}
-	wg.Wrap(func() {
+	tcp.ctx.smtu.waitGroup.Wrap(func() {
 		tcp.TCPImageServer(tcp.ctx.smtu.tcpListenerImage)
 	})
 
@@ -45,7 +45,7 @@ func newTCPServer(ctx *smtuContext) {
 		fmt.Println("listen error:", err)
 		os.Exit(1)
 	}
-	wg.Wrap(func() {
+	tcp.ctx.smtu.waitGroup.Wrap(func() {
 		tcp.TCPTCLoopbackServer(tcp.ctx.smtu.tcpListenerTCLoopback)
 	})
 
@@ -55,7 +55,7 @@ func newTCPServer(ctx *smtuContext) {
 		fmt.Println("listen error:", err)
 		os.Exit(1)
 	}
-	wg.Wrap(func() {
+	tcp.ctx.smtu.waitGroup.Wrap(func() {
 		tcp.TCPTCServer(tcp.ctx.smtu.tcpListenerTC)
 	})
 
@@ -65,7 +65,7 @@ func newTCPServer(ctx *smtuContext) {
 		fmt.Println("listen error:", err)
 		os.Exit(1)
 	}
-	wg.Wrap(func() {
+	tcp.ctx.smtu.waitGroup.Wrap(func() {
 		tcp.TCPVoiceServer(tcp.ctx.smtu.tcpListenerVoice)
 	})
 }
