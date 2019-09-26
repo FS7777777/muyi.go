@@ -9,6 +9,7 @@ import (
 )
 
 type program struct {
+	smtu *utility.SMTU
 }
 
 func main() {
@@ -18,21 +19,23 @@ func main() {
 	}
 }
 
-func (program) Init(env svc.Environment) error {
+func (p *program) Init(env svc.Environment) error {
 
 	fmt.Println("init.....")
 	return nil
 }
 
-func (program) Start() error {
-
+func (p *program) Start() error {
+	smtu := utility.New()
 	fmt.Println("start.....")
 	fmt.Println(syscall.Getpid())
-	go utility.Main()
+	go smtu.Main()
+	p.smtu = smtu
 	return nil
 }
-func (program) Stop() error {
+func (p *program) Stop() error {
 
 	fmt.Println("stop.....")
+	p.smtu.Exit()
 	return nil
 }

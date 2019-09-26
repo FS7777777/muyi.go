@@ -54,8 +54,17 @@ func newHTTPServer(ctx *smtuContext) {
 		v1.GET("/video", s.video)
 	}
 	// start http server
+	//r.Run(":" + s.ctx.smtu.smtuConfig.HttpPort)
+	srv := &http.Server{
+		Addr:    ":" + s.ctx.smtu.smtuConfig.HttpPort,
+		Handler: r,
+	}
+	s.ctx.smtu.http = srv
 	s.ctx.smtu.waitGroup.Wrap(func() {
-		r.Run(":" + s.ctx.smtu.smtuConfig.HttpPort)
+		log.Println("Listening and serving HTTP on :", srv.Addr)
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("listen: %s\n", err)
+		}
 	})
 }
 

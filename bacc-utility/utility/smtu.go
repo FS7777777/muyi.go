@@ -1,10 +1,12 @@
 package utility
 
 import (
+	"context"
 	"fmt"
 	"github.com/gorilla/websocket"
+	"log"
 	"net"
-	"os"
+	"net/http"
 	"time"
 )
 
@@ -12,7 +14,10 @@ type SMTU struct {
 	// log start time
 	startTime time.Time
 	// http server for web
+	// we not really use it, use gin instead of native http for web server
 	httpListener net.Listener
+	//gin server
+	http *http.Server
 	// telemetry message
 	tcpListenerTM net.Listener
 
@@ -40,9 +45,8 @@ type SMTU struct {
 	dataTC    []byte
 }
 
-func Main() {
-	fmt.Println(os.Args)
-	smtu := &SMTU{
+func New() *SMTU {
+	return &SMTU{
 		startTime: time.Now(),
 		// load smtu config info
 		smtuConfig: (&SMTUConfig{}).GetConf(),
@@ -52,6 +56,9 @@ func Main() {
 		clientTCLoopback: make(map[string]net.Conn),
 		clientSocket:     make(map[string]*websocket.Conn),
 	}
+}
+
+func (smtu *SMTU) Main() {
 	ctx := &smtuContext{
 		smtu: smtu,
 	}
@@ -71,6 +78,40 @@ func (smtu *SMTU) AddClientImage(clientID string, c net.Conn) {
 }
 func (smtu *SMTU) AddClientTCLoopback(clientID string, c net.Conn) {
 	smtu.clientTCLoopback[clientID] = c
+}
+
+func (smtu *SMTU) Exit() {
+	if smtu.tcpListenerTM != nil {
+		smtu.tcpListenerTM.Close()
+	}
+
+	if smtu.tcpListenerImage != nil {
+		smtu.tcpListenerImage.Close()
+	}
+
+	if smtu.tcpListenerTC != nil {
+		smtu.tcpListenerTC.Close()
+	}
+
+	if smtu.tcpListenerTCLoopback != nil {
+		smtu.tcpListenerTCLoopback.Close()
+	}
+
+	if smtu.tcpListenerVoice != nil {
+		smtu.tcpListenerVoice.Close()
+	}
+
+	if smtu.http != nil {
+		ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+		defer cancel()
+		if err := smtu.http.Shutdown(ctx); err != nil {
+			log.Fatal("Server Shutdown:", err)
+		}
+		fmt.Println("shutdown http server exit")
+	}
+
+	smtu.waitGroup.Wait()
+	fmt.Println("shutdown complete")
 }
 
 func (smtu *SMTU) send() {
