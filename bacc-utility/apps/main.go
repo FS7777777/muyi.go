@@ -3,7 +3,7 @@ package main
 import (
 	"fmt"
 	"github.com/judwhite/go-svc/svc"
-	"github.com/muyi.go/bacc-utility/utility"
+	"muyi.go/bacc-utility/utility"
 	"log"
 	"syscall"
 )

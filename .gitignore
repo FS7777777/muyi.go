@@ -5,6 +5,14 @@
 *.so
 *.dylib
 
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.iml/
+*.ipr
+*.lock
+
 # Test binary, build with `go test -c`
 *.test
 
